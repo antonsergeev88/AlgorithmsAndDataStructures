@@ -1,35 +1,32 @@
-extension RandomAccessCollection where Self: MutableCollection, Element: Comparable, Index == Int {
+extension RandomAccessCollection where Self: MutableCollection, Element: Comparable {
     mutating func mergeSort() {
         mergeSort(left: startIndex, right: endIndex)
     }
 
-    private mutating func mergeSort(left: Int, right: Int) {
-        if right - left <= 1 {
-            // nothing to do
-        } else if right - left == 2 {
-            if self[left] > self[index(before: right)] {
-                swapAt(left, index(before: right))
-            }
-        } else {
-            let middle = (right - left ) / 2
-            mergeSort(left: left, right: middle)
-            mergeSort(left: middle, right: right)
-            merge(left: left, middle: middle, right: right)
+    private mutating func mergeSort(left: Index, right: Index) {
+        precondition(left <= right)
+        let distance = self.distance(from: left, to: right)
+        guard distance > 1 else {
+            return
         }
+        let middle = index(left, offsetBy: distance / 2)
+        mergeSort(left: left, right: middle)
+        mergeSort(left: middle, right: right)
+        merge(left: left, middle: middle, right: right)
     }
 
-    private mutating func merge(left: Int, middle: Int, right: Int) {
+    private mutating func merge(left: Index, middle: Index, right: Index) {
         var i = left
         var j = middle
         var tempArray = [Element]()
-        tempArray.reserveCapacity(right - left)
+        tempArray.reserveCapacity(distance(from: left, to: right))
         while i < middle && j < right {
             if self[i] < self[j] {
                 tempArray.append(self[i])
-                i += 1
+                i = index(after: i)
             } else {
                 tempArray.append(self[j])
-                j += 1
+                j = index(after: j)
             }
         }
         if j < right {
@@ -38,8 +35,10 @@ extension RandomAccessCollection where Self: MutableCollection, Element: Compara
         if i < middle {
             tempArray.append(contentsOf: self[i..<middle])
         }
-        (left..<right).enumerated().forEach { offset, element in
-            self[element] = tempArray[offset]
+        var iOrigin = left
+        for iTemp in 0..<distance(from: left, to: right) {
+            self[iOrigin] = tempArray[iTemp]
+            iOrigin = index(after: iOrigin)
         }
     }
 }
