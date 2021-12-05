@@ -14,16 +14,16 @@ struct MinHeap<Element: Comparable> {
         let result = storage[0]
         storage[0] = storage[storage.count - 1]
         storage.removeLast()
-        moveDown(0)
+        siftDown(0)
         return result
     }
 
     mutating func insert(_ element: Element) {
         storage.append(element)
-        moveUp(storage.count - 1)
+        siftUp(storage.count - 1)
     }
 
-    private mutating func moveUp(_ bottom: Int) {
+    private mutating func siftUp(_ bottom: Int) {
         var index = bottom
         while index != 0, storage[index] < parent(for: index) {
             storage.swapAt(index, parentIndex(for: index))
@@ -31,7 +31,7 @@ struct MinHeap<Element: Comparable> {
         }
     }
 
-    private mutating func moveDown(_ root: Int) {
+    private mutating func siftDown(_ root: Int) {
         var index = root
         while true {
             var min = index
