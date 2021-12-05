@@ -5,38 +5,33 @@ extension RandomAccessCollection where Self: MutableCollection, Element: Compara
     }
 
     private mutating func quickSort(begin: Index, end: Index) {
-        precondition(begin <= end)
-        if distance(from: begin, to: end) < 2 {
+        guard distance(from: begin, to: end) > 1 else {
             return
         }
-        let pivot = findPivot(begin: begin, end: end)
-        let pivotIndex = divide(begin: begin, end: end, pivot: pivot)
-        quickSort(begin: begin, end: pivotIndex)
-        quickSort(begin: pivotIndex, end: end)
+        randomizePartition(begin: begin, end: end)
+        let pivot = partition(begin: begin, end: end)
+        quickSort(begin: begin, end: pivot)
+        quickSort(begin: pivot, end: end)
     }
 
-    private func findPivot(begin: Index, end: Index) -> Element {
-        let diff = distance(from: begin, to: end)
-        let offset = Int.random(in: 0...diff)
-        return self[index(begin, offsetBy: offset)]
-    }
-
-    private mutating func divide(begin: Index, end: Index, pivot: Element) -> Index {
+    private mutating func partition(begin: Index, end: Index) -> Index {
+        let pivot = self[index(before: end)]
         var i = index(before: begin)
         var j = begin
-        var p = end
-        while distance(from: j, to: p) > 0 {
-            let element = self[j]
-            if element == pivot {
-                p = index(before: p)
-                swapAt(j, p)
-            } else if element < pivot {
+        while j < index(before: end) {
+            if self[j] <= pivot {
                 i = index(after: i)
                 swapAt(i, j)
-                j = index(after: j)
-            } else /* element > pivot */ {
-                j = index(after: j)
             }
+            j = index(after: j)
         }
+        swapAt(index(after: i), index(before: end))
+        return index(after: i)
+    }
+
+    private mutating func randomizePartition(begin: Index, end: Index) {
+        let size = distance(from: begin, to: end)
+        let pivot = index(begin, offsetBy: Int.random(in: 0..<size))
+        swapAt(pivot, index(before: end))
     }
 }
