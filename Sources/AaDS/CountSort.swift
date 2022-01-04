@@ -4,7 +4,7 @@ protocol SortableByCount {
 
 extension Collection where Element: SortableByCount {
     func countSorted(m: Int) -> [Element] {
-        var counters = [Int].init(repeating: 0, count: m)
+        var counters = [Int](repeating: 0, count: m)
         forEach { element in
             counters[element.countSortKey] += 1
         }
@@ -14,17 +14,15 @@ extension Collection where Element: SortableByCount {
             counters[i] = previous
             previous = next
         }
-        let result = UnsafeMutableBufferPointer<Element>.allocate(capacity: count)
-        defer {
-            result.deallocate()
+        return .init(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+            initializedCount = count
+            for i in 0..<count {
+                let element = self[index(startIndex, offsetBy: i)]
+                let key = element.countSortKey
+                let offset = counters[key]
+                counters[key] += 1
+                buffer[offset] = element
+            }
         }
-        for i in 0..<count {
-            let element = self[index(startIndex, offsetBy: i)]
-            let key = element.countSortKey
-            let offset = counters[key]
-            counters[key] += 1
-            result[offset] = element
-        }
-        return .init(result)
     }
 }
